@@ -1,3 +1,6 @@
+#-----------------------------------------
+#---------Members management--------------
+#-----------------------------------------
 
 def syncmembers(conn, members):
     conn.execute("DELETE FROM members")
@@ -6,28 +9,55 @@ def syncmembers(conn, members):
         conn.execute("INSERT INTO members (iduser) VALUES(\'" + i.id + "\')")
     conn.commit()
 
+def adduser(conn, iduser):
+    conn.execute("INSERT INTO members (iduser) VALUES(\'" + iduser + "\')")
+    conn.commit()
+
+def removeuser(conn, iduser):
+    conn.execute("DELETE FROM members where iduser=\'" + iduser + "\')")
+    conn.commit()
+
 def memberlist(conn):
     return conn.execute("SELECT iduser FROM members") 
+
+def showaccounts(conn):
+    return conn.execute("SELECT iduser,balance FROM members") 
+
+
+
+#-----------------------------------------
+#---------Quests management---------------
+#-----------------------------------------
+
+def getQuestId(conn,name):
+    i = conn.execute("SELECT id FROM quests where name=\'" + name + "\'").fetchone()[0]
+    return i
+
 
 def createQ(conn, name, price, numberp):
     conn.execute("INSERT INTO quests (name, price, numberp) VALUES(\'" + name + "\'," + str(price) + "," + str(numberp) + ")")
     conn.commit()
     
 def contribute(conn, quest, iduser, amount):
-    questid = conn.execute("SELECT id FROM quests where name=\'" + quest + "\'")    
-    conn.execute("INSERT INTO contribs (idquest, iduser, amount) VALUES (\'" + str(questid.fetchone()[0]) + "\',\'" + iduser + "\'," + str(amount) +")")
+    questid = getQuestId(conn,quest)   
+    conn.execute("INSERT INTO contribs (idquest, iduser, amount) VALUES (\'" + str(questid) + "\',\'" + iduser + "\'," + str(amount) +")")
     conn.commit()
 
-def nonpayes(conn, quest):
-    np=[]
-    questid = conn.execute("SELECT id FROM quests where name=\'" + quest + "\'").fetchone()[0]
-    payes = conn.execute("SELECT iduser FROM contribs where idquest=" + str(questid))
-    members = conn.execute("SELECT iduser FROM members")  
-    lpayes = [p[0] for p in payes]
-    lmembers = [m[0] for m in members]       
-    return list(set(lmembers) - set(lpayes))
+def updateBalance(conn, iduser, idquest):    
+    contrib = conn.execute("SELECT sum(amount) FROM contribs where idquest=" + str(idquest) + " AND iduser=\'" + iduser + "\'").fetchone()[0]
+    if not(contrib):
+        contrib = 0    
+    prevBalance = conn.execute("SELECT balance FROM members where iduser=\'" + iduser + "\'").fetchone()[0]
+    (price, np) = conn.execute("SELECT price, numberp FROM quests WHERE id=" + str(idquest)).fetchone()
+    askedContrib = price//np
+    newBalance = prevBalance + contrib - askedContrib
+    conn.execute("UPDATE members SET balance=" + str(newBalance) + " WHERE iduser=\'" + iduser + "\'")
+    conn.commit()
 
-def delquest(conn, quest):
+def endquest(conn, quest):
+    members = memberlist(conn)
+    for m in members:
+        updateBalance(conn, m[0], getQuestId(conn,quest))
     conn.execute("DELETE FROM quests where name=\'" + quest + "\'")
     conn.commit()
 

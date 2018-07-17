@@ -4,7 +4,8 @@ conn = sqlite3.connect('database.db')
 print("Opened database successfully")
 
 conn.execute('''CREATE TABLE members
-         (iduser TEXT PRIMARY KEY);''')
+         (iduser TEXT PRIMARY KEY,
+          balance INTEGER DEFAULT 0);''')
 
 conn.execute('''CREATE TABLE quests
          (id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -13,7 +14,8 @@ conn.execute('''CREATE TABLE quests
          numberp INTEGER NO NULL);''')
 
 conn.execute('''CREATE TABLE contribs
-         (iduser TEXT PRIMARY KEY,
+         (id INTEGER PRIMARY KEY AUTOINCREMENT,
+         iduser TEXT NOT NULL,
          idquest INTEGER NOT NULL,         
          amount INTEGER NOT NULL,
          
@@ -30,4 +32,3 @@ conn.execute('''CREATE TABLE contribs
 
 
 conn.close()
-
