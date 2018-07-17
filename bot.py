@@ -77,16 +77,28 @@ async def accounts(context, *args):
 
         await bot.send_message(context.message.channel, result)
 
+@bot.command(pass_context=True, name='adduser')
+async def adduser(context, *args):
+    if len(args) != 1:
+        await bot.send_message(context.message.channel, "Commande : .adduser id ")
+    else:
+        dbmanager.adduser(conn, args[0])
+        await bot.send_message(context.message.channel, 'Done')
 
+@bot.command(pass_context=True, name='removeuser')
+async def removeuser(context, *args):
+    if len(args) != 1:
+        await bot.send_message(context.message.channel, "Commande : .removeuser id")
+    else:
+        dbmanager.removeuser(conn,args[0])
+        await bot.send_message(context.message.channel, 'Done')
 
-
-
-        
-
-    
-    
-          
-    
+@bot.command(pass_context=True, name='balance')
+async def balance(context, *args):
+    if len(args) == 0:
+        await bot.send_message(context.message.channel, "Your balance is : " + str(dbmanager.getBalance(conn, context.message.author.id)))   
+    else:
+        await bot.send_message(context.message.channel, "Commande : .balance")
 
 bot.run(TOKEN)
 

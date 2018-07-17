@@ -10,11 +10,11 @@ def syncmembers(conn, members):
     conn.commit()
 
 def adduser(conn, iduser):
-    conn.execute("INSERT INTO members (iduser) VALUES(\'" + iduser + "\')")
+    conn.execute("INSERT INTO members (iduser) VALUES(\'" + iduser + "\'")
     conn.commit()
 
 def removeuser(conn, iduser):
-    conn.execute("DELETE FROM members where iduser=\'" + iduser + "\')")
+    conn.execute("DELETE FROM members where iduser=\'" + iduser + "\'")
     conn.commit()
 
 def memberlist(conn):
@@ -22,6 +22,9 @@ def memberlist(conn):
 
 def showaccounts(conn):
     return conn.execute("SELECT iduser,balance FROM members") 
+
+def getBalance(conn, iduser):
+    return conn.execute("SELECT balance FROM members WHERE iduser=\'" + iduser + "\'").fetchone()[0]
 
 
 
